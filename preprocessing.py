@@ -94,4 +94,15 @@ for count, filename in enumerate(files):
             count += 1
     except:
         print("exception occured")
+<<<<<<< HEAD
         pass
+=======
+        pass
+
+
+
+
+    
+
+
+>>>>>>> 60267ff (linux)

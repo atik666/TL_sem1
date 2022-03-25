@@ -155,7 +155,10 @@ class AlexNet(nn.Module):
     x = self.layer7(x)
     x = self.layer8(x)
     return x
+<<<<<<< HEAD
 
+=======
+>>>>>>> 60267ff (linux)
 #Move the input and AlexNet_model to GPU for speed if available
 model_ft = AlexNet()
 #Instantiating CUDA device

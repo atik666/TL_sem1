@@ -1,5 +1,4 @@
 from __future__ import print_function, division
-
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -13,7 +12,7 @@ import copy
 # Just normalization for validation
 data_transforms = {
     'train': transforms.Compose([
-        transforms.Resize(256),
+        #transforms.Resize(256),
         transforms.RandomResizedCrop(224),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
@@ -27,17 +26,15 @@ data_transforms = {
     ]),
 }
 
-<<<<<<< HEAD
-file = "ImageNet_Processed/A"
+weight_file = "A"
+num_layer = 7
+data_file = "B"
 
-dirc = '/home/huaxia/Documents/Atik/ImageNet-ILSVRC2012/'
-=======
-file = "partitioned/A"
+print("Model: %s%d%s" %(weight_file, num_layer, data_file))
 
-dirc = '/home/admin1/Documents/Atik/Imagenet/'
->>>>>>> 60267ff (linux)
+dirc = '/home/huaxia/Documents/Atik/'
 
-data_dir = dirc + file
+data_dir = dirc + data_file
 
 image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                           data_transforms[x])
@@ -46,16 +43,7 @@ dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=256,
                                              shuffle=True, num_workers=2)
               for x in ['train', 'val']}
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
-
-#class_names = image_datasets['train'].classes
-#img_dict = {}
-#for i in range(len(class_names)):
-#    img_dict[class_names[i]] = 0
-#
-#for i in range(len(image_datasets["train"])):
-#    print(i)
-#    img, label = image_datasets["train"][i]
-#    img_dict[class_names[label]] += 1
+class_names = image_datasets['train'].classes
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -128,7 +116,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=5):
     return model
 
 class AlexNet(nn.Module):
-  def __init__(self,num_classes=500):
+  def __init__(self,num_classes=50):
     super(AlexNet,self).__init__()
     self.layer1 = nn.Sequential(
       nn.Conv2d(in_channels=3,out_channels=64,kernel_size=11,stride=4,padding=2),
@@ -154,10 +142,10 @@ class AlexNet(nn.Module):
       nn.ReLU(inplace=True))
     self.layer7 = nn.Sequential(
       nn.Dropout(p=0.5),
-      nn.Linear(in_features=4096, out_features=4096,bias=True))
+      nn.Linear(in_features=4096, out_features=2048,bias=True))
     self.layer8 = nn.Sequential(
       nn.ReLU(inplace=True),
-      nn.Linear(in_features=4096, out_features=num_classes,bias=True))
+      nn.Linear(in_features=2048, out_features=num_classes,bias=True))
     
   def forward(self,x):
     x = self.layer1(x)
@@ -170,35 +158,57 @@ class AlexNet(nn.Module):
     x = self.layer7(x)
     x = self.layer8(x)
     return x
+
 #Move the input and AlexNet_model to GPU for speed if available
-model_ft = AlexNet()
+new_model = AlexNet()
 #Instantiating CUDA device
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 #Verifying CUDA
 print(device)
-model_ft.to(device)
-print(model_ft)
+new_model.to(device)
+print(new_model)
+
+new_model.load_state_dict(torch.load(dirc + "layers_{}.pth".format(weight_file)))
+
+print(new_model.eval())
+
+def freeze_layers(new_model, layer):
+    count = 0
+    for param in new_model.parameters():
+        count +=1
+        if count < 2 * layer + 1: #freezing first n layers
+            param.requires_grad = False
+            
+    for name, param in new_model.named_parameters():
+        print(name, ':', param.requires_grad)
+        
+    return new_model
+
+new_model = freeze_layers(new_model, layer = num_layer)
+
+#def weight_init(m):
+#    if isinstance(m, nn.Conv2d):
+#        if m.weight is not None:
+#            torch.nn.init.xavier_uniform_(m.weight)
+#        if m.bias is not None:
+#            torch.nn.init.zeros_(m.bias)          
+#    if isinstance(m, nn.Linear):
+#        if m.weight is not None:
+#            torch.nn.init.xavier_uniform_(m.weight)
+#        if m.bias is not None:
+#            torch.nn.init.zeros_(m.bias)
+#
+#new_model.apply(weight_init)    
 
 criterion = nn.CrossEntropyLoss()
 
 # Observe that all parameters are being optimized
-optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.01, momentum=0.9)
+optimizer_ft = optim.SGD(new_model.parameters(), lr=0.001, momentum=0.9)
 
-# Decay LR by a factor of 0.1 every 7 epochs
+# Decay LR by a factor
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=5, gamma=0.9)
+            
+new_model = train_model(new_model, criterion, optimizer_ft,
+                        exp_lr_scheduler, num_epochs=100)
+        
 
-model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-<<<<<<< HEAD
-                       num_epochs=5)
-
-torch.save(model_ft.state_dict(), data_dir + "{}.pth".format(file[-1:]))
-=======
-                       num_epochs=100)
-
-torch.save(model_ft.state_dict(), data_dir + "{}100.pth".format(file[-1:]))
->>>>>>> 60267ff (linux)
-
-# new_model = TL_model('alexnet')
-# new_model.load_state_dict(torch.load(dirc + "{}.pth".format(file)))
-
-# print(new_model.eval())

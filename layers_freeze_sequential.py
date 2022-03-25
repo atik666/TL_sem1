@@ -12,7 +12,11 @@ import copy
 # Just normalization for validation
 data_transforms = {
     'train': transforms.Compose([
+<<<<<<< HEAD
         #transforms.Resize(256),
+=======
+        transforms.Resize(256),
+>>>>>>> 60267ff (linux)
         transforms.RandomResizedCrop(224),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
@@ -26,11 +30,21 @@ data_transforms = {
     ]),
 }
 
+<<<<<<< HEAD
 weight_file = "B"
 num_layer = 4
 data_file = "B"
 
 dirc = '/home/huaxia/Documents/Atik/'
+=======
+weight_file = "BB100"
+num_layer = 1
+data_file = "B"
+
+print("Model: %s%d%s" %(weight_file, num_layer, data_file))
+
+dirc = '/home/admin1/Documents/Atik/Imagenet/partitioned/'
+>>>>>>> 60267ff (linux)
 
 data_dir = dirc + data_file
 
@@ -45,7 +59,11 @@ class_names = image_datasets['train'].classes
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
+<<<<<<< HEAD
 def train_model(model, criterion, optimizer, scheduler, num_epochs=5):
+=======
+def train_model(model, criterion, optimizer, scheduler, num_epochs=10):
+>>>>>>> 60267ff (linux)
     since = time.time()
 
     best_model_wts = copy.deepcopy(model.state_dict())
@@ -114,7 +132,11 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=5):
     return model
 
 class AlexNet(nn.Module):
+<<<<<<< HEAD
   def __init__(self,num_classes=50):
+=======
+  def __init__(self,num_classes=500):
+>>>>>>> 60267ff (linux)
     super(AlexNet,self).__init__()
     self.layer1 = nn.Sequential(
       nn.Conv2d(in_channels=3,out_channels=64,kernel_size=11,stride=4,padding=2),
@@ -140,10 +162,17 @@ class AlexNet(nn.Module):
       nn.ReLU(inplace=True))
     self.layer7 = nn.Sequential(
       nn.Dropout(p=0.5),
+<<<<<<< HEAD
       nn.Linear(in_features=4096, out_features=2048,bias=True))
     self.layer8 = nn.Sequential(
       nn.ReLU(inplace=True),
       nn.Linear(in_features=2048, out_features=num_classes,bias=True))
+=======
+      nn.Linear(in_features=4096, out_features=4096,bias=True))
+    self.layer8 = nn.Sequential(
+      nn.ReLU(inplace=True),
+      nn.Linear(in_features=4096, out_features=num_classes,bias=True))
+>>>>>>> 60267ff (linux)
     
   def forward(self,x):
     x = self.layer1(x)
@@ -166,7 +195,11 @@ print(device)
 new_model.to(device)
 print(new_model)
 
+<<<<<<< HEAD
 new_model.load_state_dict(torch.load(dirc + "layers_{}.pth".format(weight_file)))
+=======
+new_model.load_state_dict(torch.load(dirc + "{}.pth".format(weight_file)))
+>>>>>>> 60267ff (linux)
 
 print(new_model.eval())
 
@@ -201,7 +234,11 @@ new_model.apply(weight_init)
 criterion = nn.CrossEntropyLoss()
 
 # Observe that all parameters are being optimized
+<<<<<<< HEAD
 optimizer_ft = optim.SGD(new_model.parameters(), lr=0.001, momentum=0.9)
+=======
+optimizer_ft = optim.SGD(new_model.parameters(), lr=0.01, momentum=0.9)
+>>>>>>> 60267ff (linux)
 
 # Decay LR by a factor
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=5, gamma=0.9)
@@ -209,4 +246,8 @@ exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=5, gamma=0.9)
 new_model = train_model(new_model, criterion, optimizer_ft,
                         exp_lr_scheduler, num_epochs=100)
         
+<<<<<<< HEAD
 
+=======
+print("Model: %s%d%s" %(weight_file, num_layer, data_file))
+>>>>>>> 60267ff (linux)
